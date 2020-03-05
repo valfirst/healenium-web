@@ -158,6 +158,7 @@
             width: 141px;
             height: 88px;
             box-shadow: 0 2px 24px 0 rgba(0, 0, 0, 0.09);
+             cursor: pointer;
         }
 
         .element-field-holder {
@@ -196,6 +197,59 @@
             text-align: right;
             cursor: pointer;
         }
+
+        /* Style the Image Used to Trigger the Modal */
+        #myImg {
+          border-radius: 5px;
+          cursor: pointer;
+          transition: 0.3s;
+        }
+
+        #myImg:hover {opacity: 0.7;}
+
+        .popup{
+            width: 900px;
+            margin: auto;
+            text-align: center
+        }
+
+        .show{
+            z-index: 999;
+            display: none;
+        }
+        .show .overlay{
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,.66);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .show .img-show{
+            width: 600px;
+            height: 400px;
+            background: #FFF;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            overflow: hidden
+        }
+        .img-show span{
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 99;
+            cursor: pointer;
+        }
+        .img-show img{
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        /*End style*/
     </style>
 </head>
     <body>
@@ -246,7 +300,14 @@
                     {contentElements}
                 </div>
                 <div class="screenshot-column">
-                    <img src={screenShotPath} class="screenshot-image" onclick="location.href=this.src"/>
+                    <img src={screenShotPath} class="screenshot-image">
+                </div>
+                 <div class="show">
+                  <div class="overlay"></div>
+                    <div class="img-show">
+                        <span class="img-close">X</span>
+                        <img src="">
+                    </div>
                 </div>
                 <div class="actions-column" data-actions-index={dataIndex}>
                     {actionItems}
@@ -265,6 +326,43 @@
         let elements = [];
         let storageItemKey = '';
         let savedElementsStatuses = [];
+
+        function openImage() {
+            console.log("openImage")
+            var src = this.getAttribute("src");
+            fadeIn(".show");
+            document.querySelector(".img-show img").setAttribute("src", src);
+        }
+
+         function closeImage() {
+            console.log("closeImage")
+               fadeOut(".show");
+         }
+
+        function fadeIn(el) {
+            var opacity = 0.01;
+            document.querySelector(el).style.display = "block";
+            var timer = setInterval(function() {
+                if(opacity >= 1) {
+                    clearInterval(timer);
+                }
+                document.querySelector(el).style.opacity = opacity;
+                opacity += opacity * 0.1;
+            }, 10);
+        }
+
+        function fadeOut(el) {
+            var opacity = 1;
+            var timer = setInterval(function() {
+                if(opacity <= 0.1) {
+                    clearInterval(timer);
+                    document.querySelector(el).style.display = "none";
+
+                }
+                document.querySelector(el).style.opacity = opacity;
+                opacity -= opacity * 0.1;
+            }, 10);
+        }
 
         function getAcceptElementUrl(fileName, oldLocator, newLocator) {
           return `http://localhost:8091?target=${fileName}&oldLocator=${oldLocator}&newLocator=${newLocator}`;
@@ -384,6 +482,11 @@
               actionItems: getStatusActionsMarkup(itemStatus),
             });
           });
+
+           const image =  document.querySelector('.screenshot-column img');
+           image.addEventListener('click', openImage);
+           const closeImage =  document.querySelector('.overlay');
+           closeImage.addEventListener('click', closeImage);
         }
 
         function processData(data) {
